@@ -37,10 +37,9 @@ app.listen(3000, function(){
 })
 
 
-
-
-
 // const path = require('path');
 // //both the lines functions in same way
 // console.log(path.join(__dirname,'public'));
 // console.log(__dirname+'/public');
+
+
