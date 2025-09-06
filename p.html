@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hackathon Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar for better UX */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+          background-color: #a78bfa; /* purple-400 */
+          border-radius: 4px;
+        }
+        ::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        /* Fixed card layout to prevent expansion affecting other cards */
+        .hackathon-card {
+            display: flex;
+            flex-direction: column;
+            height: fit-content;
+            align-self: start; /* Prevents cards from stretching to match tallest */
+        }
+
+        /* Smooth form expansion animation */
+        .form-section {
+            transition: all 0.3s ease-in-out;
+            overflow: hidden;
+        }
+
+        .form-section.expanding {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        .form-section.expanded {
+            max-height: 500px;
+            opacity: 1;
+        }
+
+        /* Grid layout that maintains independent card sizing */
+        .hackathon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            align-items: start; /* Key: prevents cards from stretching */
+        }
+
+        @media (min-width: 768px) {
+            .hackathon-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen flex items-center justify-center p-4">
+<div id="app" class="w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden">
+    <!-- Auth Container - Centered -->
+    <div id="auth-container" class="p-10 flex flex-col justify-center space-y-8">
+        <!-- Login Form -->
+        <div id="login-view" class="">
+            <div class="text-center mb-8">
+                <div class="inline-block bg-gradient-to-r from-purple-500 to-pink-500 p-4 rounded-full shadow-lg mb-4">
+                    <div class="text-white text-4xl font-extrabold select-none">H</div>
+                </div>
+                <h1 class="text-4xl font-extrabold text-gray-900 mb-2">HackHub</h1>
+                <p class="text-gray-600 text-lg">Hackathon Management System</p>
+            </div>
+            <div class="space-y-6">
+                <div>
+                    <label for="login-email" class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                    <input
+                            type="email"
+                            id="login-email"
+                            placeholder="Enter your email"
+                            class="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-400 transition"
+                    />
+                </div>
+                <div>
+                    <label for="login-password" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                    <input
+                            type="password"
+                            id="login-password"
+                            placeholder="Enter your password"
+                            class="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-400 transition"
+                    />
+                </div>
+                <div>
+                    <label for="login-role" class="block text-sm font-semibold text-gray-700 mb-2">Select Role</label>
+                    <select
+                            id="login-role"
+                            class="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-400 transition"
+                    >
+                        <option value="" disabled selected>Choose your role</option>
+                        <option value="student">Student</option>
+                        <option value="organizer">Organizer</option>
+                        <option value="judge">Judge</option>
+                    </select>
+                </div>
+                <button
+                        type="button"
+                        onclick="handleLogin()"
+                        class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition"
+                >
+                    Sign In
+                </button>
+            </div>
+            <p class="mt-6 text-center text-gray-600">
+                Don't have an account?
+                <button onclick="showRegisterView()" class="text-purple-600 font-semibold hover:underline">Register here</button>
+            </p>
+        </div>
+
+        <!-- Register Form -->
+        <div id="register-view" class="hidden">
+            <div class="text-center mb-8">
+                <div class="inline-block bg-gradient-to-r from-purple-500 to-pink-500 p-4 rounded-full shadow-lg mb-4">
+                    <div class="text-white text-4xl font-extrabold select-none">H</div>
+                </div>
+                <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Create Account</h1>
+                <p class="text-gray-600 text-lg">Join the Hackathon Community</p>
+            </div>
+            <div class="space-y-6">
+                <div>
+                    <label for="register-name" class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                    <input
+                            type="text"
+                            id="register-name"
+                            placeholder="Enter your full name"
+                            class="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-400 transition"
+                    />
+                </div>
+                <div>
+                    <label for="register-email" class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                    <input
+                            type="email"
+                            id="register-email"
+                            placeholder="Enter your email"
+                            class="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-400 transition"
+                    />
+                </div>
+                <div>
+                    <label for="register-password" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                    <input
+                            type="password"
+                            id="register-password"
+                            placeholder="Create a password"
+                            class="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-400 transition"
+                    />
+                </div>
+                <div>
+                    <label for="register-role" class="block text-sm font-semibold text-gray-700 mb-2">Role</label>
+                    <select
+                            id="register-role"
+                            class="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-400 transition"
+                    >
+                        <option value="student">Student</option>
+                        <option value="organizer">Organizer</option>
+                        <option value="judge">Judge</option>
+                    </select>
+                </div>
+                <button
+                        type="button"
+                        onclick="handleRegister()"
+                        class="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-blue-700 transition"
+                >
+                    Create Account
+                </button>
+            </div>
+            <p class="mt-6 text-center text-gray-600">
+                Already have an account?
+                <button onclick="showLoginView()" class="text-purple-600 font-semibold hover:underline">Sign in</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- Dashboard View - Now takes full width when visible -->
+    <div id="dashboard-view" class="hidden fixed inset-0 w-screen h-screen bg-gray-50 overflow-y-auto">
+        <div class="p-8 flex flex-col min-h-screen">
+            <header class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-gradient-to-r from-purple-500 to-pink-500 p-3 rounded-lg shadow-lg">
+                        <div class="text-white text-3xl font-extrabold select-none">H</div>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-gray-900">Hackathon Hub</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow">
+                        <div class="w-8 h-8 bg-purple-300 rounded-full flex items-center justify-center text-purple-900 font-bold select-none">U</div>
+                        <div>
+                            <p id="user-name" class="font-semibold text-gray-800"></p>
+                            <p id="user-role" class="text-sm text-purple-600 capitalize"></p>
+                        </div>
+                    </div>
+                    <button
+                            onclick="clearSavedData(); location.reload();"
+                            class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition text-sm"
+                            title="Clear all saved data and reset"
+                    >
+                        Reset Data
+                    </button>
+                    <button
+                            onclick="handleLogout()"
+                            class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 transition"
+                    >
+                        Logout
+                    </button>
+                </div>
+            </header>
+            <main id="dashboard-content" class="space-y-8 flex-grow overflow-y-auto max-w-4xl mx-auto w-full"></main>
+        </div>
+    </div>
+</div>
+
+<script>
+    // State management variables
+    let currentUser = null;
+    let users = [];
+    let hackathons = [];
+
+    // Data persistence functions (using localStorage for browser storage)
+    function saveData() {
+        try {
+            localStorage.setItem('hackathon_users', JSON.stringify(users));
+            localStorage.setItem('hackathon_hackathons', JSON.stringify(hackathons));
+            localStorage.setItem('hackathon_currentUser', JSON.stringify(currentUser));
+            console.log('Data saved successfully');
+        } catch (error) {
+            console.error('Error saving data:', error);
+        }
+    }
+
+    function loadSavedData() {
+        try {
+            const savedUsers = localStorage.getItem('hackathon_users');
+            const savedHackathons = localStorage.getItem('hackathon_hackathons');
+            const savedCurrentUser = localStorage.getItem('hackathon_currentUser');
+
+            if (savedUsers) {
+                users = JSON.parse(savedUsers);
+            }
+            if (savedHackathons) {
+                hackathons = JSON.parse(savedHackathons);
+            }
+            if (savedCurrentUser) {
+                currentUser = JSON.parse(savedCurrentUser);
+                if (currentUser) {
+                    showDashboard();
+                    return true;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading saved data:', error);
+        }
+        return false;
+    }
+
+    function clearSavedData() {
+        try {
+            localStorage.removeItem('hackathon_users');
+            localStorage.removeItem('hackathon_hackathons');
+            localStorage.removeItem('hackathon_currentUser');
+            console.log('All data cleared');
+        } catch (error) {
+            console.error('Error clearing data:', error);
+        }
+    }
+
+    // Load initial data
+    function loadData() {
+        // Try to load saved data first
+        if (loadSavedData()) {
+            return; // User was automatically logged in
+        }
+
+        // Default users for testing (only if no saved data)
+        if (users.length === 0) {
+            users = [
+                { id: 1, name: 'Admin User', email: 'admin@hackathon.com', password: 'admin123', role: 'organizer' },
+                { id: 2, name: 'Judge Smith', email: 'judge@hackathon.com', password: 'judge123', role: 'judge' },
+                { id: 3, name: 'Student One', email: 'student@hackathon.com', password: 'student123', role: 'student' }
+            ];
+        }
+
+        // Default hackathons for testing (only if no saved data)
+        if (hackathons.length === 0) {
+            hackathons = [
+                {
+                    id: 1,
+                    title: 'AI Innovation Challenge',
+                    theme: 'Artificial Intelligence',
+                    deadline: '2025-10-15',
+                    prize: '$5000',
+                    rules: 'Build an AI solution that solves real-world problems',
+                    organizerId: 1,
+                    participants: [],
+                    projects: [],
+                    judges: [2],
+                    teams: []
+                },
+                {
+                    id: 2,
+                    title: 'Web Dev Hackathon',
+                    theme: 'Web Development',
+                    deadline: '2025-09-30',
+                    prize: '$3000',
+                    rules: 'Create innovative web applications',
+                    organizerId: 1,
+                    participants: [],
+                    projects: [],
+                    judges: [],
+                    teams: []
+                }
+            ];
+        }
+
+        saveData(); // Save the initial data
+    }
+
+    // Utility functions
+    function validateEmail(email) {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailPattern.test(email);
+    }
+
+    function validateURL(url) {
+        const urlPattern = /^(https?:\/\/)|(www\.)|([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/;
+        return urlPattern.test(url);
+    }
+
+    function safeExecute(func, ...args) {
+        try {
+            return func(...args);
+        } catch (error) {
+            console.error('Error executing function:', error);
+            alert('An error occurred. Please try again.');
+            return null;
+        }
+    }
+
+    // View management functions
+    function showLoginView() {
+        document.getElementById('login-view').classList.remove('hidden');
+        document.getElementById('register-view').classList.add('hidden');
+        document.getElementById('dashboard-view').classList.add('hidden');
+        clearLoginForm();
+    }
+
+    function showRegisterView() {
+        document.getElementById('register-view').classList.remove('hidden');
+        document.getElementById('login-view').classList.add('hidden');
+        document.getElementById('dashboard-view').classList.add('hidden');
+        clearRegisterForm();
+    }
+
+    function showDashboard() {
+        document.getElementById('dashboard-view').classList.remove('hidden');
+        document.getElementById('login-view').classList.add('hidden');
+        document.getElementById('register-view').classList.add('hidden');
+        document.getElementById('user-name').textContent = currentUser.name;
+        document.getElementById('user-role').textContent = currentUser.role;
+        renderDashboard();
+    }
+
+    // Form clearing functions
+    function clearLoginForm() {
+        document.getElementById('login-email').value = '';
+        document.getElementById('login-password').value = '';
+        document.getElementById('login-role').value = '';
+    }
+
+    function clearRegisterForm() {
+        document.getElementById('register-name').value = '';
+        document.getElementById('register-email').value = '';
+        document.getElementById('register-password').value = '';
+        document.getElementById('register-role').value = 'student';
+    }
+
+    function clearProjectForm(hackathonId) {
+        const titleField = document.getElementById(`project-title-${hackathonId}`);
+        const descField = document.getElementById(`project-desc-${hackathonId}`);
+        const githubField = document.getElementById(`github-link-${hackathonId}`);
+        const pptField = document.getElementById(`ppt-link-${hackathonId}`);
+
+        if (titleField) titleField.value = '';
+        if (descField) descField.value = '';
+        if (githubField) githubField.value = '';
+        if (pptField) pptField.value = '';
+    }
+
+    // Authentication handlers
+    function handleLogin() {
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+        const role = document.getElementById('login-role').value;
+
+        if (!email || !password || !role) {
+            alert('Please fill all login fields.');
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            alert('Please enter a valid email address.');
+            return;
+        }
+
+        const user = users.find(u =>
+            u.email.toLowerCase() === email.toLowerCase() &&
+            u.password === password &&
+            u.role === role
+        );
+
+        if (user) {
+            currentUser = user;
+            saveData();
+            showDashboard();
+        } else {
+            alert('Invalid credentials or role mismatch!');
+        }
+    }
+
+    function handleRegister() {
+        const name = document.getElementById('register-name').value.trim();
+        const email = document.getElementById('register-email').value.trim();
+        const password = document.getElementById('register-password').value;
+        const role = document.getElementById('register-role').value;
+
+        if (!name || !email || !password) {
+            alert('Please fill all registration fields.');
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            alert('Please enter a valid email address.');
+            return;
+        }
+
+        if (password.length < 6) {
+            alert('Password must be at least 6 characters long.');
+            return;
+        }
+
+        if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+            alert('Email already registered.');
+            return;
+        }
+
+        const newUser = {
+            id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
+            name,
+            email,
+            password,
+            role
+        };
+        users.push(newUser);
+        saveData();
+        alert('Registration successful! Please log in.');
+        showLoginView();
+    }
+
+    function handleLogout() {
+        currentUser = null;
+        saveData();
+        showLoginView();
+    }
+
+    // Score calculation functions
+    function calculateProjectScore(project) {
+        if (!project.scores || project.scores.length === 0) return 0;
+        const total = project.scores.reduce((sum, s) => sum + s.score, 0);
+        return (total / project.scores.length).toFixed(1);
+    }
+
+    function getLeaderboard(hackathon) {
+        return hackathon.projects
+            .map(project => ({ ...project, avgScore: parseFloat(calculateProjectScore(project)) }))
+            .sort((a, b) => b.avgScore - a.avgScore);
+    }
+
+    // Project form animation functions
+    function toggleProjectForm(hackathonId) {
+        const form = document.getElementById(`project-form-${hackathonId}`);
+        const button = document.getElementById(`toggle-btn-${hackathonId}`);
+
+        if (!form || !button) return;
+
+        if (form.classList.contains('hidden')) {
+            // Show form
+            form.classList.remove('hidden');
+            form.classList.add('form-section', 'expanding');
+            button.textContent = 'Cancel';
+            button.className = 'w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition';
+
+            // Trigger animation
+            setTimeout(() => {
+                form.classList.remove('expanding');
+                form.classList.add('expanded');
+            }, 10);
+        } else {
+            // Hide form
+            form.classList.remove('expanded');
+            form.classList.add('expanding');
+
+            setTimeout(() => {
+                form.classList.add('hidden');
+                form.classList.remove('form-section', 'expanding');
+                button.textContent = 'Submit Team Project';
+                button.className = 'w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-blue-700 transition';
+            }, 300);
+        }
+    }
+
+    // Team management functions
+    function showTeamForm(hackathonId) {
+        const formHtml = `
+            <div id="team-form-${hackathonId}" class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-4">
+                <h4 class="font-semibold text-gray-900 mb-3">Create Your Team (4 members required)</h4>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Team Name</label>
+                    <input type="text" id="team-name-${hackathonId}" placeholder="Enter team name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Team Member Emails (including yourself - 4 total)</label>
+                    <input type="email" id="member-email-1-${hackathonId}" placeholder="Member 1 email (your email)" value="${currentUser.email}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" readonly />
+                    <input type="email" id="member-email-2-${hackathonId}" placeholder="Member 2 email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    <input type="email" id="member-email-3-${hackathonId}" placeholder="Member 3 email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    <input type="email" id="member-email-4-${hackathonId}" placeholder="Member 4 email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="createTeam(${hackathonId})" class="flex-1 bg-gradient-to-r from-green-600 to-blue-600 text-white py-2 rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition">Create Team</button>
+                    <button onclick="cancelTeamCreation(${hackathonId})" class="flex-1 bg-gray-500 text-white py-2 rounded-lg font-semibold hover:bg-gray-600 transition">Cancel</button>
+                </div>
+            </div>
+        `;
+        
+        const registerButton = document.querySelector(`[onclick="registerForHackathon(${hackathonId})"]`);
+        if (registerButton) {
+            registerButton.insertAdjacentHTML('afterend', formHtml);
+            registerButton.style.display = 'none';
+        }
+    }
+
+    function cancelTeamCreation(hackathonId) {
+        const teamForm = document.getElementById(`team-form-${hackathonId}`);
+        const registerButton = document.querySelector(`[onclick="registerForHackathon(${hackathonId})"]`);
+        
+        if (teamForm) {
+            teamForm.remove();
+        }
+        if (registerButton) {
+            registerButton.style.display = 'block';
+        }
+    }
+
+    function createTeam(hackathonId) {
+        const teamName = document.getElementById(`team-name-${hackathonId}`)?.value.trim();
+        const member1Email = document.getElementById(`member-email-1-${hackathonId}`)?.value.trim();
+        const member2Email = document.getElementById(`member-email-2-${hackathonId}`)?.value.trim();
+        const member3Email = document.getElementById(`member-email-3-${hackathonId}`)?.value.trim();
+        const member4Email = document.getElementById(`member-email-4-${hackathonId}`)?.value.trim();
+
+        if (!teamName) {
+            alert('Please enter a team name.');
+            return;
+        }
+
+        const memberEmails = [member1Email, member2Email, member3Email, member4Email];
+        
+        // Validate all emails are filled
+        if (memberEmails.some(email => !email)) {
+            alert('Please fill all 4 member email addresses.');
+            return;
+        }
+
+        // Validate all emails are valid
+        if (memberEmails.some(email => !validateEmail(email))) {
+            alert('Please enter valid email addresses for all members.');
+            return;
+        }
+
+        // Check for duplicate emails
+        const uniqueEmails = [...new Set(memberEmails)];
+        if (uniqueEmails.length !== 4) {
+            alert('All team member emails must be unique.');
+            return;
+        }
+
+        const hackathon = hackathons.find(h => h.id === hackathonId);
+        if (!hackathon) {
+            alert('Hackathon not found!');
+            return;
+        }
+
+        // Check if user is already registered
+        if (hackathon.participants.includes(currentUser.id)) {
+            alert('You are already registered for this hackathon!');
+            return;
+        }
+
+        // Create team object
+        const newTeam = {
+            id: Date.now(),
+            name: teamName,
+            leader: currentUser.id,
+            leaderName: currentUser.name,
+            members: memberEmails,
+            hackathonId: hackathonId,
+            hasSubmittedProject: false
+        };
+
+        // Add team to hackathon
+        if (!hackathon.teams) {
+            hackathon.teams = [];
+        }
+        hackathon.teams.push(newTeam);
+
+        // Add current user to participants
+        hackathon.participants.push(currentUser.id);
+
+        saveData();
+        alert(`Team "${teamName}" created successfully! You are now registered for the hackathon.`);
+        renderDashboard();
+    }
+
+    // Hackathon management functions
+    function registerForHackathon(hackathonId) {
+        showTeamForm(hackathonId);
+    }
+
+    function submitProject(hackathonId) {
+        const title = document.getElementById(`project-title-${hackathonId}`)?.value.trim();
+        const description = document.getElementById(`project-desc-${hackathonId}`)?.value.trim();
+        const githubLink = document.getElementById(`github-link-${hackathonId}`)?.value.trim();
+        const pptLink = document.getElementById(`ppt-link-${hackathonId}`)?.value.trim();
+
+        if (!title || !description || !githubLink || !pptLink) {
+            alert('Please fill all project fields.');
+            return;
+        }
+
+        if (!validateURL(githubLink) || !validateURL(pptLink)) {
+            alert('Please enter valid URLs. URLs should start with http:// or https://');
+            return;
+        }
+
+        const hackathon = hackathons.find(h => h.id === hackathonId);
+        if (!hackathon) {
+            alert('Hackathon not found!');
+            return;
+        }
+
+        // Find user's team for this hackathon
+        const userTeam = hackathon.teams?.find(t => t.leader === currentUser.id);
+        if (!userTeam) {
+            alert('Team not found! Please contact support.');
+            return;
+        }
+
+        // Check if team already submitted a project for this hackathon
+        if (hackathon.projects.some(p => p.teamId === userTeam.id)) {
+            alert('Your team has already submitted a project for this hackathon!');
+            return;
+        }
+
+        const newProject = {
+            id: Date.now(),
+            title,
+            description,
+            githubLink,
+            pptLink,
+            teamId: userTeam.id,
+            teamName: userTeam.name,
+            teamLeader: currentUser.name,
+            teamMembers: userTeam.members,
+            scores: []
+        };
+
+        hackathon.projects.push(newProject);
+
+        // Mark team as having submitted project
+        userTeam.hasSubmittedProject = true;
+
+        // Clear form and hide it
+        clearProjectForm(hackathonId);
+
+        // Hide the form
+        const form = document.getElementById(`project-form-${hackathonId}`);
+        const button = document.getElementById(`toggle-btn-${hackathonId}`);
+        if (form && button) {
+            form.classList.add('hidden');
+            form.classList.remove('form-section', 'expanding', 'expanded');
+            button.style.display = 'none';
+        }
+
+        saveData();
+        alert('Project submitted successfully!');
+        renderDashboard();
+    }
+
+    function createHackathon() {
+        const title = document.getElementById('hackathon-title').value.trim();
+        const theme = document.getElementById('hackathon-theme').value.trim();
+        const deadline = document.getElementById('hackathon-deadline').value;
+        const prize = document.getElementById('hackathon-prize').value.trim();
+        const rules = document.getElementById('hackathon-rules').value.trim();
+
+        if (!title || !theme || !deadline || !prize || !rules) {
+            alert('Please fill all hackathon fields.');
+            return;
+        }
+
+        // Enhanced deadline validation
+        const deadlineDate = new Date(deadline);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time to start of day for fair comparison
+        
+        if (deadlineDate <= today) {
+            alert('Deadline must be at least one day in the future from today.');
+            return;
+        }
+
+        // Additional validation: Check if deadline is too far in the future (optional)
+        const maxFutureDate = new Date();
+        maxFutureDate.setFullYear(maxFutureDate.getFullYear() + 2); // 2 years from now
+        
+        if (deadlineDate > maxFutureDate) {
+            alert('Deadline cannot be more than 2 years in the future.');
+            return;
+        }
+
+        const newHackathon = {
+            id: hackathons.length > 0 ? Math.max(...hackathons.map(h => h.id)) + 1 : 1,
+            title,
+            theme,
+            deadline,
+            prize,
+            rules,
+            organizerId: currentUser.id,
+            participants: [],
+            projects: [],
+            judges: [],
+            teams: []
+        };
+        hackathons.push(newHackathon);
+
+        // Clear inputs
+        document.getElementById('hackathon-title').value = '';
+        document.getElementById('hackathon-theme').value = '';
+        document.getElementById('hackathon-deadline').value = '';
+        document.getElementById('hackathon-prize').value = '';
+        document.getElementById('hackathon-rules').value = '';
+
+        saveData();
+        alert('Hackathon created successfully!');
+        renderDashboard();
+    }
+
+    // Scoring functions
+    function scoreProject(hackathonId, projectId, criteria, score) {
+        const hackathon = hackathons.find(h => h.id === hackathonId);
+        const project = hackathon.projects.find(p => p.id === projectId);
+
+        if (!project) return;
+
+        const existingScoreIndex = project.scores.findIndex(s =>
+            s.judgeId === currentUser.id && s.criteria === criteria
+        );
+
+        if (existingScoreIndex >= 0) {
+            project.scores[existingScoreIndex].score = parseInt(score);
+        } else {
+            project.scores.push({
+                judgeId: currentUser.id,
+                criteria,
+                score: parseInt(score)
+            });
+        }
+
+        // Update average score display live
+        const avgScoreElem = document.getElementById(`avg-score-${projectId}`);
+        if (avgScoreElem) {
+            avgScoreElem.textContent = calculateProjectScore(project) + '/10';
+        }
+
+        saveData();
+    }
+
+    function submitScores() {
+        const leaderboardDiv = document.getElementById('leaderboard');
+        const leaderboardList = document.getElementById('leaderboard-list');
+
+        if (!leaderboardDiv || !leaderboardList) return;
+
+        leaderboardList.innerHTML = '';
+
+        // Collect all projects from all hackathons
+        let allProjects = [];
+        hackathons.forEach(h => {
+            h.projects.forEach(p => {
+                allProjects.push({
+                    title: p.title,
+                    teamName: p.teamName || p.studentName || 'Unknown Team',
+                    avgScore: parseFloat(calculateProjectScore(p))
+                });
+            });
+        });
+
+        if (allProjects.length === 0) {
+            leaderboardList.innerHTML = '<p class="text-gray-600">No projects submitted yet.</p>';
+        } else {
+            // Sort descending by avgScore
+            allProjects.sort((a, b) => b.avgScore - a.avgScore);
+            // Take top 3
+            const top3 = allProjects.slice(0, 3);
+            top3.forEach((p, i) => {
+                const item = document.createElement('div');
+                item.className = 'flex justify-between items-center p-3 bg-purple-50 rounded-lg';
+                item.innerHTML = `
+                    <div>
+                        <span class="font-semibold text-lg">#${i + 1}</span>
+                        <span class="ml-2 text-lg font-medium">${p.title}</span>
+                        <span class="ml-2 text-sm text-gray-600">by ${p.teamName}</span>
+                    </div>
+                    <div class="text-purple-700 font-bold text-lg">${p.avgScore}/10</div>
+                `;
+                leaderboardList.appendChild(item);
+            });
+        }
+        leaderboardDiv.classList.remove('hidden');
+        leaderboardDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Dashboard rendering function
+    function renderDashboard() {
+        const content = document.getElementById('dashboard-content');
+
+        if (currentUser.role === 'student') {
+            content.innerHTML = `
+                <section>
+                    <h2 class="text-3xl font-bold mb-6 text-gray-900">Available Hackathons</h2>
+                    <div class="hackathon-grid">
+                        ${hackathons.map(h => {
+                            const isRegistered = h.participants.includes(currentUser.id);
+                            const userTeam = h.teams?.find(t => t.leader === currentUser.id);
+                            const hasSubmitted = userTeam ? userTeam.hasSubmittedProject : false;
+                            return `
+                                <article class="hackathon-card bg-white rounded-2xl shadow-md p-6 hover:shadow-xl transition-shadow">
+                                    <header class="flex justify-between items-center mb-4">
+                                        <h3 class="text-xl font-semibold text-gray-900">${h.title}</h3>
+                                        <div class="text-yellow-400 font-bold text-2xl select-none">🏆</div>
+                                    </header>
+                                    <div class="mb-4 space-y-2 text-gray-600 text-sm">
+                                        <p><strong>Theme:</strong> ${h.theme}</p>
+                                        <p><strong>Deadline:</strong> ${h.deadline}</p>
+                                        <p><strong>Prize:</strong> ${h.prize}</p>
+                                        <p><em>${h.rules}</em></p>
+                                    </div>
+
+                                    ${!isRegistered
+                                        ? `<button onclick="registerForHackathon(${h.id})" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition">Register & Create Team</button>`
+                                        : !hasSubmitted && userTeam
+                                        ? `
+                                            <div class="space-y-4">
+                                                <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                                    <div class="text-green-800 font-semibold mb-2">✓ Registered - Team: ${userTeam.name}</div>
+                                                    <div class="text-xs text-green-600">
+                                                        <strong>Team Members:</strong><br>
+                                                        ${userTeam.members.map((email, index) => `${index + 1}. ${email}`).join('<br>')}
+                                                    </div>
+                                                </div>
+
+                                                <div id="project-form-${h.id}" class="hidden space-y-3">
+                                                    <input type="text" id="project-title-${h.id}" placeholder="Project Title" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-400 focus:outline-none" />
+                                                    <textarea id="project-desc-${h.id}" placeholder="Project Description" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-400 focus:outline-none resize-none"></textarea>
+                                                    <input type="url" id="github-link-${h.id}" placeholder="GitHub Link (e.g., https://github.com/...)" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-400 focus:outline-none" />
+                                                    <input type="url" id="ppt-link-${h.id}" placeholder="PPT Link (e.g., https://drive.google.com/...)" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-400 focus:outline-none" />
+                                                    <button onclick="submitProject(${h.id})" class="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-blue-700 transition">Submit Team Project</button>
+                                                </div>
+
+                                                <button id="toggle-btn-${h.id}" onclick="toggleProjectForm(${h.id})" class="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-blue-700 transition">Submit Team Project</button>
+                                            </div>
+                                        `
+                                        : hasSubmitted && userTeam
+                                        ? `<div class="space-y-2">
+                                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 font-semibold">✓ Project Submitted</div>
+                                            <div class="p-2 bg-gray-50 border border-gray-200 rounded-lg">
+                                                <div class="text-sm text-gray-600"><strong>Team:</strong> ${userTeam.name}</div>
+                                            </div>
+                                          </div>`
+                                        : `<div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 font-semibold">Registration in progress...</div>`
+                                    }
+                                </article>
+                            `;
+                        }).join('')}
+                    </div>
+                </section>
+            `;
+        } else if (currentUser.role === 'organizer') {
+            content.innerHTML = `
+                <section>
+                    <h2 class="text-3xl font-bold mb-6 text-gray-900">Create New Hackathon</h2>
+                    <form id="create-hackathon-form" class="bg-white rounded-2xl shadow-md p-6 mb-10 space-y-6" onsubmit="event.preventDefault(); createHackathon();">
+                        <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
+                            <input type="text" id="hackathon-title" placeholder="Hackathon Title" required class="px-5 py-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-400 focus:outline-none" />
+                            <input type="text" id="hackathon-theme" placeholder="Theme" required class="px-5 py-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-400 focus:outline-none" />
+                            <input type="date" id="hackathon-deadline" required class="px-5 py-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-400 focus:outline-none" />
+                            <input type="text" id="hackathon-prize" placeholder="Prize Amount (e.g., $5000)" required class="px-5 py-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-400 focus:outline-none" />
+                        </div>
+                        <textarea id="hackathon-rules" placeholder="Rules and Guidelines" rows="4" required class="w-full px-5 py-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-400 focus:outline-none resize-none"></textarea>
+                        <button type="submit" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition w-full">Create Hackathon</button>
+                    </form>
+                </section>
+
+                <section>
+                    <h2 class="text-3xl font-bold mb-6 text-gray-900">My Hackathons</h2>
+                    ${hackathons.filter(h => h.organizerId === currentUser.id).length === 0
+                        ? '<p class="text-gray-600 bg-white p-6 rounded-xl">No hackathons created yet. Create your first hackathon above!</p>'
+                        : `<div class="grid gap-6 md:grid-cols-2">
+                            ${hackathons.filter(h => h.organizerId === currentUser.id).map(h => `
+                                <div class="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-3">${h.title}</h3>
+                                    <div class="grid grid-cols-3 gap-4 mb-4">
+                                        <div class="text-center p-3 bg-blue-50 rounded-lg">
+                                            <div class="text-2xl font-bold text-blue-600">${h.participants.length}</div>
+                                            <div class="text-sm text-gray-600">Participants</div>
+                                        </div>
+                                        <div class="text-center p-3 bg-purple-50 rounded-lg">
+                                            <div class="text-2xl font-bold text-purple-600">${h.teams ? h.teams.length : 0}</div>
+                                            <div class="text-sm text-gray-600">Teams</div>
+                                        </div>
+                                        <div class="text-center p-3 bg-green-50 rounded-lg">
+                                            <div class="text-2xl font-bold text-green-600">${h.projects.length}</div>
+                                            <div class="text-sm text-gray-600">Submissions</div>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <h4 class="font-medium text-gray-900">Leaderboard</h4>
+                                        ${h.projects.length === 0
+                                            ? '<p class="text-sm text-gray-500">No submissions yet</p>'
+                                            : getLeaderboard(h).slice(0, 3).map((p, i) => `
+                                                <div class="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-sm font-medium">#${i + 1}</span>
+                                                        <div class="text-sm">
+                                                            <div class="font-medium">${p.title}</div>
+                                                            <div class="text-xs text-gray-500">by ${p.teamName}</div>
+                                                        </div>
+                                                    </div>
+                                                    <span class="text-sm font-medium text-purple-600">${p.avgScore}/10</span>
+                                                </div>
+                                            `).join('')
+                                        }
+                                    </div>
+                                </div>
+                            `).join('')}
+                          </div>`
+                    }
+                </section>
+            `;
+        } else if (currentUser.role === 'judge') {
+            content.innerHTML = `
+                <section>
+                    <h2 class="text-3xl font-bold mb-6 text-gray-900">Projects to Evaluate</h2>
+                    <div class="space-y-6">
+                        ${hackathons.map(h => `
+                            <div class="bg-white rounded-xl shadow-sm border p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">${h.title}</h3>
+                                ${h.projects.length === 0 ? '<p class="text-gray-500">No projects submitted yet.</p>' : `
+                                    <div class="space-y-4">
+                                        ${h.projects.map(p => `
+                                            <div class="border rounded-lg p-4">
+                                                <div class="flex justify-between items-start mb-3">
+                                                    <div>
+                                                        <h4 class="font-medium text-gray-900">${p.title}</h4>
+                                                        <p class="text-sm text-gray-600">by Team: ${p.teamName}</p>
+                                                        <p class="text-xs text-gray-500">Team Leader: ${p.teamLeader}</p>
+                                                        <div class="text-xs text-gray-400 mt-1">
+                                                            <strong>Team Members:</strong><br>
+                                                            ${p.teamMembers?.map((email, index) => `${index + 1}. ${email}`).join('<br>') || 'Not available'}
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <div class="text-lg font-bold text-purple-600" id="avg-score-${p.id}">${calculateProjectScore(p)}/10</div>
+                                                        <div class="text-xs text-gray-500">Average Score</div>
+                                                    </div>
+                                                </div>
+                                                <p class="text-sm text-gray-700 mb-3">${p.description}</p>
+                                                <div class="flex gap-4 mb-4">
+                                                    <a href="${p.githubLink}" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-600 hover:underline">GitHub →</a>
+                                                    <a href="${p.pptLink}" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-600 hover:underline">Presentation →</a>
+                                                </div>
+                                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                    ${['Innovation', 'Design', 'Impact', 'Technology'].map(c => `
+                                                        <div>
+                                                            <label class="block text-xs font-medium text-gray-700 mb-1">${c}</label>
+                                                            <select onchange="scoreProject(${h.id}, ${p.id}, '${c}', this.value)" class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                                                <option value="">Score</option>
+                                                                ${[1,2,3,4,5,6,7,8,9,10].map(s => `<option value="${s}" ${p.scores.find(sc => sc.judgeId === currentUser.id && sc.criteria === c)?.score == s ? 'selected' : ''}>${s}</option>`).join('')}
+                                                            </select>
+                                                        </div>
+                                                    `).join('')}
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                `}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button onclick="submitScores()" class="mt-6 w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition">Submit Scores & Show Leaderboard</button>
+                    <div id="leaderboard" class="mt-8 hidden">
+                        <h3 class="text-2xl font-bold mb-4">Leaderboard - Top 3 Teams</h3>
+                        <div id="leaderboard-list" class="space-y-3"></div>
+                    </div>
+                </section>
+            `;
+        }
+    }
+
+    // Initialize app
+    function initializeApp() {
+        loadData();
+
+        // If user was already logged in, show dashboard; otherwise show login
+        if (!currentUser) {
+            showLoginView();
+        }
+    }
+
+    // Initialize app when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeApp();
+    });
+
+</script>
+</body>
+</html>
