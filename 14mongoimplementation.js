@@ -4,8 +4,8 @@
 //model
 //crud
 //npm i mongoose - helps in conversation be node server and mongodb server
-//ORM - object relational mapping
-//ODM - object document mapping
+//ORM - Object Relational Mapping
+//ODM - Object Document Mapping
 
 
 const express = require('express');
