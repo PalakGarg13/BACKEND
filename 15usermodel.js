@@ -5,5 +5,5 @@ const userSchema = mongoose.Schema({
    username:String,
    email:String
 })
-//create a model for create read update
+//create a model for create read and update
 module.exports = mongoose.model("user",userSchema);
