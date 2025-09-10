@@ -7,4 +7,4 @@ const userSchema = mongoose.Schema({
 })
 //create a model for create read and update
 module.exports = mongoose.model("user",userSchema);
-//this is mongodb
+//this is MongoDB
