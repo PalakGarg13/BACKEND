@@ -34,7 +34,7 @@ Collections -> jese apne pass A hai vo bda database hai and uske andr jo alg alg
 jese facebook ki collection customers hai
 
 Document - jese A ek database hai aur usmein users ka data hai (i.e collection) aur users mein bhi ek user ke data ko document bolte hai
-
+Cycle:-
 Database -> Collections -> Document
 
 CODE                                  DATABASE
