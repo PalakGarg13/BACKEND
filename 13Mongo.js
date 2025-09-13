@@ -14,7 +14,7 @@ NoSQL - ismein objs hote hain
 example:- mongoDB is a actual database -> it stores data in the form of objs -> it is based on NoSQL theory.
 
 {
-  "name":"palak",
+  "name":Palak",
   "age":19
 }
 
