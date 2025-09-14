@@ -26,7 +26,7 @@ Data ke kaam ko chod ke baki sb Application server krta hai
 
 if ise koi data ki need hoti hai toh yeh data database server se leta hai
 
-database server -> mongodb
+database server -> mongoDB
 
 terminologies - collections, documents, schemas, keys, models
 
