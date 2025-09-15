@@ -1,7 +1,7 @@
 //mongo installation
 //mongodb connection
 //schema
-//model
+//Model
 //crud
 //npm i mongoose - helps in conversation be node server and mongodb server
 //ORM - Object Relational Mapping
