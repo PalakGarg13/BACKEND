@@ -34,3 +34,4 @@ var arr = [1,2,3,4];
 console.log(arr.indexOf(12)); //agr nhi hai toh return -1
 console.log(arr.indexOf(3));
 
+//vgcfuhdef
