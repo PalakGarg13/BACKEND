@@ -8,7 +8,6 @@ Object.freeze(obj);
 obj.age = 25;//use to change the value of age
 
 // function abcd(a,b,c){ if i write abcd.length it gives me output = 3
-
 // }
 
 function abcd(){

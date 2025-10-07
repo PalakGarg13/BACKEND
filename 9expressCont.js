@@ -24,7 +24,7 @@ res.status(500).send('Something broke!');
 
 // console.log(err.stack) → Logs the error stack trace in the console for debugging.
 
-// res.status(500).send('Something broke!'); → Sends a 500 Internal Server Error response to the client with the message 'Something broke!'.
+// res.status(500).send('Something broke!');->Sends a 500 Internal Server Error response to the client with the message 'Something broke!'.
 
 // This middleware will run only when next(err) is called or an error occurs.
 
