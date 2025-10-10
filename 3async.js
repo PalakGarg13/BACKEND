@@ -6,7 +6,7 @@
 //jo bhi code async nature ka ho usse side stack mein bhejdo and 
 //agle code ko chlao jo bhi sync nature ka ho, jab bhi sara sync code chl jae
 //tab check karo async code complete hua ya nhi nad agr vo complete hua ho toh usse
-//main stack mein lao and chala do
+//main Stack(FIFO) mein lao and chala do
 
 async function abcd(){
 var blob = await fetch(`https://randomuser.me/api/`)
